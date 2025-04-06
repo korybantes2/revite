@@ -58,8 +58,13 @@ jobs:
                   cache-to: type=local,dest=/tmp/.buildx-cache-new/${{ matrix.architecture }},mode=max
             - name: Move cache
               run: |
+                  mkdir -p /tmp/.buildx-cache
                   rm -rf /tmp/.buildx-cache/${{ matrix.architecture }}
-                  mv /tmp/.buildx-cache-new/${{ matrix.architecture }} /tmp/.buildx-cache/${{ matrix.architecture }}
+                  if [ -d /tmp/.buildx-cache-new/${{ matrix.architecture }} ]; then
+                      mv /tmp/.buildx-cache-new/${{ matrix.architecture }} /tmp/.buildx-cache/${{ matrix.architecture }}
+                  else
+                      echo "No new cache available for ${{ matrix.architecture }}."
+                  fi
 
     publish:
         needs: [test]
@@ -107,5 +112,10 @@ jobs:
                   cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
             - name: Move cache
               run: |
+                  mkdir -p /tmp/.buildx-cache
                   rm -rf /tmp/.buildx-cache
-                  mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+                  if [ -d /tmp/.buildx-cache-new ]; then
+                      mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+                  else
+                      echo "No new cache available."
+                  fi
