@@ -58,13 +58,13 @@ jobs:
                   cache-to: type=local,dest=/tmp/.buildx-cache-new/${{ matrix.architecture }},mode=max
             - name: Move cache
               run: |
-                  mkdir -p /tmp/.buildx-cache
-                  rm -rf /tmp/.buildx-cache/${{ matrix.architecture }}
-                  if [ -d /tmp/.buildx-cache-new/${{ matrix.architecture }} ]; then
-                      mv /tmp/.buildx-cache-new/${{ matrix.architecture }} /tmp/.buildx-cache/${{ matrix.architecture }}
-                  else
-                      echo "No new cache available for ${{ matrix.architecture }}."
-                  fi
+                     mkdir -p /tmp/.buildx-cache/linux
+                     rm -rf /tmp/.buildx-cache/linux/amd64
+                     if [ -d /tmp/.buildx-cache-new/linux/amd64 ]; then
+                     mv /tmp/.buildx-cache-new/linux/amd64 /tmp/.buildx-cache/linux/amd64
+                      else
+                          echo "No new cache available for linux/amd64."
+                            fi
 
     publish:
         needs: [test]
@@ -112,10 +112,10 @@ jobs:
                   cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
             - name: Move cache
               run: |
-                  mkdir -p /tmp/.buildx-cache
-                  rm -rf /tmp/.buildx-cache
-                  if [ -d /tmp/.buildx-cache-new ]; then
-                      mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-                  else
-                      echo "No new cache available."
-                  fi
+                     mkdir -p /tmp/.buildx-cache/linux
+                     rm -rf /tmp/.buildx-cache/linux/amd64
+                     if [ -d /tmp/.buildx-cache-new/linux/amd64 ]; then
+                     mv /tmp/.buildx-cache-new/linux/amd64 /tmp/.buildx-cache/linux/amd64
+                      else
+                          echo "No new cache available for linux/amd64."
+                            fi
