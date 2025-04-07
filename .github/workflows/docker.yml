@@ -2,26 +2,21 @@ name: Docker
 
 on:
   push:
-    branches:
-      - "master"
-    tags:
-      - "*"
+    branches: [ "master" ]
+    tags: [ "*" ]
     paths-ignore:
       - ".github/**"
       - "!.github/workflows/docker.yml"
-      - "!.github/workflows/preview_*.yml"
       - ".vscode/**"
       - ".gitignore"
       - ".gitlab-ci.yml"
       - "LICENSE"
       - "README"
   pull_request:
-    branches:
-      - "master"
+    branches: [ "master" ]
     paths-ignore:
       - ".github/**"
       - "!.github/workflows/docker.yml"
-      - "!.github/workflows/preview_*.yml"
       - ".vscode/**"
       - ".gitignore"
       - ".gitlab-ci.yml"
@@ -32,118 +27,67 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        architecture: [linux/amd64]  # Adjusted architecture as needed
     steps:
-      # Checkout code from the repository
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          submodules: "recursive"
+          submodules: recursive
 
-      # Set up QEMU for multi-platform builds (optional)
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v2
 
-      # Set up Docker Buildx for efficient builds
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # Cache Docker layers to speed up builds
-      - name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache/${{ matrix.architecture }}
-          key: ${{ runner.os }}-buildx-${{ matrix.architecture }}-${{ github.sha }}
-
-      # Build the Docker image using Buildx
-      - name: Build
-        uses: docker/build-push-action@v2
+      - name: Build Docker image (test only)
+        uses: docker/build-push-action@v4
         with:
           context: .
-          platforms: ${{ matrix.architecture }}
-          cache-from: type=local,src=/tmp/.buildx-cache/${{ matrix.architecture }}
-          cache-to: type=local,dest=/tmp/.buildx-cache-new/${{ matrix.architecture }},mode=max
-
-      # Move cache if available
-      - name: Move cache
-        run: |
-          mkdir -p /tmp/.buildx-cache/linux
-          rm -rf /tmp/.buildx-cache/linux/amd64
-          if [ -d /tmp/.buildx-cache-new/linux/amd64 ]; then
-            mv /tmp/.buildx-cache-new/linux/amd64 /tmp/.buildx-cache/linux/amd64
-          else
-            echo "No new cache available for linux/amd64."
-          fi
+          platforms: linux/amd64
+          push: false
 
   publish:
-    needs: [test]
+    needs: test
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
     steps:
-      # Checkout code from the repository
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          submodules: "recursive"
+          submodules: recursive
 
-      # Set up QEMU for multi-platform builds
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v2
 
-      # Set up Docker Buildx for efficient builds
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v2
 
-      # Cache Docker layers to speed up future builds
-      - name: Cache amd64 Docker layers
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache/linux/amd64
-          key: ${{ runner.os }}-buildx-linux/amd64-${{ github.sha }}
-
-      # Generate Docker metadata (tags and labels)
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v4
         with:
-          images: moryy/gangio-client, ghcr.io/moryy/gangio-client  # Tags for Docker Hub and GHCR
+          images: |
+            moryy/gangio-client
+            ghcr.io/moryy/gangio-client
 
-      # Log in to Docker Hub
-      - name: Login to DockerHub
-        uses: docker/login-action@v3.4.0
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}  # Ensure you have this secret in your GitHub settings
-          password: ${{ secrets.DOCKERHUB_TOKEN }}    # Docker Hub token (preferred over password)
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # Log in to GitHub Container Registry (if you also want to publish there)
-      - name: Login to Github Container Registry
-        uses: docker/login-action@v3.4.0
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Build and push the Docker image
-      - name: Build and publish
-        uses: docker/build-push-action@v6.15.0
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
         with:
           context: .
+          platforms: linux/amd64
           push: true
-          platforms: linux/amd64  # Adjust platforms as needed
-          tags: ${{ steps.meta.outputs.tags }}  # Dynamic tags
-          labels: ${{ steps.meta.outputs.labels }}  # Dynamic labels
-          cache-from: type=local,src=/tmp/.buildx-cache/linux/amd64
-          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-
-      # Move cache if available
-      - name: Move cache
-        run: |
-          mkdir -p /tmp/.buildx-cache/linux
-          rm -rf /tmp/.buildx-cache/linux/amd64
-          if [ -d /tmp/.buildx-cache-new/linux/amd64 ]; then
-            mv /tmp/.buildx-cache-new/linux/amd64 /tmp/.buildx-cache/linux/amd64
-          else
-            echo "No new cache available for linux/amd64."
-          fi
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
