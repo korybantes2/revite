@@ -80,6 +80,7 @@ const TRUSTED_HOSTS = [
     "local.revolt.chat:3000",
     "local.revolt.chat:3001",
     "rvlt.gg",
+    "app.read-me.pro",
 ];
 
 const REMOTE = "https://rvlt.gg";
