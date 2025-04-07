@@ -1,9 +1,9 @@
 [submodule "external/lang"]
 	path = external/lang
-	url = https://github.com/revoltchat/translations
+	url = https://github.com/korybantes2/translations
 [submodule "external/components"]
 	path = external/components
-	url = https://github.com/revoltchat/components
+	url = https://github.com/korybantes2/components
 [submodule "external/revolt.js"]
 	path = external/revolt.js
-	url = https://github.com/revoltchat/revolt.js
+	url = https://github.com/korybantes2/revolt.js
