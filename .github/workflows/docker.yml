@@ -110,8 +110,8 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
-          source: "client.tar"
-          target: "/home/${{ secrets.VPS_USER }}/"
+          source: client.tar
+          target: /home/${{ secrets.VPS_USER }}/client.tar
 
       - name: Deploy on VPS via SSH
         uses: appleboy/ssh-action@v1.0.0
