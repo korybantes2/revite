@@ -173,7 +173,7 @@
     "workbox-precaching": "^6.1.5"
   },
   "resolutions": {
-    "@revoltchat/ui": "portal:external/components",
-    "revolt.js": "portal:external/revolt.js"
+    "@revoltchat/ui": "github:korybantes2/revite#main:external/components",
+    "revolt.js":  "github:korybantes2/revite#main:external/revolt.js"
   }
 }
